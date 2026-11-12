@@ -3,15 +3,12 @@ const mysql = require('mysql2/promise');
 const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
-
 const app = express();
 const PORT = process.env.PORT || 3000;
-
 // Middlewares
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
-
 // Pool de conexiones a MySQL
 const pool = mysql.createPool({
     host: process.env.DB_HOST || 'localhost',
@@ -21,7 +18,6 @@ const pool = mysql.createPool({
     waitForConnections: true,
     connectionLimit: 10
 });
-
 // RUTA 1: Consultar todas las asistencias
 app.get('/api/asistencias', async (req, res) => {
     try {
@@ -38,7 +34,6 @@ app.get('/api/asistencias', async (req, res) => {
         res.status(500).json({ error: 'Error interno del servidor' });
     }
 });
-
 // RUTA 2: Registrar asistencia desde la chingadera esa
 app.post('/api/registrar-huella', async (req, res) => {
     const { id_biometrico } = req.body;
@@ -46,20 +41,16 @@ app.post('/api/registrar-huella', async (req, res) => {
     if (!id_biometrico) {
         return res.status(400).json({ error: 'Falta el ID biométrico' });
     }
-
     try {
         // 1. Buscar al estudiante por su ID biométrico
         const [estudiantes] = await pool.query(
             'SELECT id, nombre_completo FROM estudiantes WHERE id_biometrico = ?',
             [id_biometrico]
         );
-
         if (estudiantes.length === 0) {
             return res.status(404).json({ error: 'Huella/Rostro no reconocido en el sistema' });
         }
-
         const estudiante = estudiantes[0];
-
         // 2. Insertar el registro de asistencia
         await pool.query(
             'INSERT INTO asistencias (estudiante_id, estado) VALUES (?, ?)',
@@ -72,9 +63,31 @@ app.post('/api/registrar-huella', async (req, res) => {
     } catch (error) {
         console.error('Error al registrar asistencia:', error);
         res.status(500).json({ error: 'Error al procesar el registro' });
+        // RUTA 3: Registrar un nuevo estudiante en la base de datos
+app.post('/api/estudiantes', async (req, res) => {
+    const { matricula, nombre_completo, id_biometrico } = req.body;
+
+    if (!matricula || !nombre_completo || !id_biometrico) {
+        return res.status(400).json({ error: 'Todos los campos son obligatorios' });
+    }
+
+    try {
+        await pool.query(
+            'INSERT INTO estudiantes (matricula, nombre_completo, id_biometrico) VALUES (?, ?, ?)',
+            [matricula, nombre_completo, id_biometrico]
+        );
+        res.status(201).json({ mensaje: '¡Estudiante registrado con éxito en el sistema!' });
+    } catch (error) {
+        // Controlar si la matrícula o el ID biométrico ya existen
+        if (error.code === 'ER_DUP_ENTRY') {
+            return res.status(400).json({ error: 'La matrícula o el ID biométrico ya están registrados.' });
+        }
+        console.error('Error al registrar estudiante:', error);
+        res.status(500).json({ error: 'Error interno al registrar el estudiante' });
     }
 });
-
+    }
+});
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
