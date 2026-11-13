@@ -34,7 +34,7 @@ $res_historial = $conexion->query(
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#ffffff">
     <title>SiBCAE | Justificantes</title>
-    <link rel="stylesheet" href="alumno.css">
+    <link rel="stylesheet" href="justificantes.css">
 </head>
 <body>
     <div class="app-shell">
