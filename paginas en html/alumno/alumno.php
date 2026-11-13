@@ -72,6 +72,10 @@ $porcentaje = ($total_clases > 0)
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.5h8l4 4V20a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1Z"/><path d="M14 3.5v4h4M9 13h6M9 17h4"/></svg>
                     <span>Justificantes</span>
                 </a>
+                <a class="nav-link" href="cambiar-password.php">
+                     <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                     <span>Seguridad</span>
+                </a>
             </nav>
 
             <div class="sidebar-bottom">

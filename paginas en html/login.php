@@ -63,6 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#ffffff">
     <title>SiBCAE | Iniciar Sesión</title>
+    <link rel="icon" href="SiBCAE_LogoW&B.png" type="image/png">
     <link rel="stylesheet" href="login.css">
 </head>
 <body class="login-body">
