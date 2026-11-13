@@ -1,4 +1,5 @@
 <?php
+session_set_cookie_params(0, '/');
 session_start();
 include '../conexion.php';
 
@@ -17,13 +18,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['accion'] === 'crear') {
     $nombre    = $conexion->real_escape_string(trim($_POST['nombre']));
     $grupo     = $conexion->real_escape_string($_POST['grupo']);
     $correo    = $codigo . "@alumnos.sibcae.edu.mx";
-    $password  = password_hash($codigo, PASSWORD_DEFAULT); // Contraseña inicial = su código
+    $password  = password_hash($codigo, PASSWORD_DEFAULT);
 
     $sql = "INSERT INTO usuarios (id_huella, nombre, codigo, correo, grupo, rol, password) 
             VALUES ($id_huella, '$nombre', '$codigo', '$correo', '$grupo', 'alumno', '$password')";
 
     if ($conexion->query($sql)) {
-        // Activar modo enrolar en la ESP32 si se pidió capturar huella
         if ($_POST['estado_huella'] === 'Pendiente') {
             $conexion->query("UPDATE control_sensor SET modo = 'enrolar', id_a_registrar = $id_huella WHERE id = 1");
             $mensaje_alerta = "Alumno registrado. ¡Sensor AS608 ACTIVADO! Coloca el dedo del alumno para grabar el ID #$id_huella.";
@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['accion'] === 'editar') {
     $nombre    = $conexion->real_escape_string(trim($_POST['nombre']));
     $grupo     = $conexion->real_escape_string($_POST['grupo']);
 
-    $sql = "UPDATE usuarios SET id_huella=$id_huella, codigo='$codigo', nombre='$nombre', grupo='$grupo' WHERE id=$id_db";
+    $sql = "UPDATE usuarios SET id_huella=$id_huella, codigo='$codigo', nombre='$nombre', grupo='$grupo' WHERE id_huella=$id_db";
     if ($conexion->query($sql)) {
         if ($_POST['estado_huella'] === 'Pendiente') {
             $conexion->query("UPDATE control_sensor SET modo = 'enrolar', id_a_registrar = $id_huella WHERE id = 1");
@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['accion'] === 'editar') {
 // 3. ELIMINAR ALUMNO
 if (isset($_GET['eliminar'])) {
     $id_eliminar = intval($_GET['eliminar']);
-    $conexion->query("DELETE FROM usuarios WHERE id = $id_eliminar AND rol = 'alumno'");
+    $conexion->query("DELETE FROM usuarios WHERE id_huella = $id_eliminar AND rol = 'alumno'");
     header("Location: gestion-alumnos.php");
     exit;
 }
@@ -203,10 +203,10 @@ if ($res_alumnos) {
                                     <td><span class="status present"><span></span>Vinculada</span></td>
                                     <td class="actions-cell">
                                         <button type="button" class="table-action-btn edit-btn" 
-                                            onclick="openEditModal(<?php echo $st['id']; ?>, '<?php echo $st['id_huella']; ?>', '<?php echo htmlspecialchars($st['codigo']); ?>', '<?php echo htmlspecialchars($st['nombre']); ?>', '<?php echo htmlspecialchars($st['grupo'] ?? '1°A'); ?>')">
+                                            onclick="openEditModal(<?php echo $st['id_huella']; ?>, '<?php echo $st['id_huella']; ?>', '<?php echo htmlspecialchars($st['codigo']); ?>', '<?php echo htmlspecialchars($st['nombre']); ?>', '<?php echo htmlspecialchars($st['grupo'] ?? '1°A'); ?>')">
                                             Editar
                                         </button>
-                                        <a href="gestion-alumnos.php?eliminar=<?php echo $st['id']; ?>" 
+                                        <a href="gestion-alumnos.php?eliminar=<?php echo $st['id_huella']; ?>" 
                                            class="table-action-btn delete-btn" 
                                            style="text-decoration:none; display:inline-block;"
                                            onclick="return confirm('¿Seguro que deseas eliminar a <?php echo htmlspecialchars($st['nombre']); ?>?')">

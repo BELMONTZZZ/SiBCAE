@@ -1,4 +1,5 @@
 <?php
+session_set_cookie_params(0, '/');
 session_start();
 include '../conexion.php';
 
@@ -11,13 +12,13 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'alumno') {
 $usuario_id = intval($_SESSION['usuario_id']);
 
 // Obtener datos actualizados del alumno (incluyendo su grupo)
-$res_user = $conexion->query("SELECT * FROM usuarios WHERE id = $usuario_id LIMIT 1");
-$datos_alumno = $res_user->fetch_assoc();
+$res_user = $conexion->query("SELECT * FROM usuarios WHERE id_huella = $usuario_id LIMIT 1");
+$datos_alumno = $res_user ? $res_user->fetch_assoc() : [];
 $grupo_alumno = $datos_alumno['grupo'] ?? '1°A';
-$id_huella    = $datos_alumno['id_huella'] ?? '0';
+$id_huella    = $datos_alumno['id_huella'] ?? $usuario_id;
 
 // Consultar historial de asistencias del alumno en la base de datos
-$sql = "SELECT * FROM asistencias WHERE usuario_id = $usuario_id ORDER BY fecha DESC, hora DESC";
+$sql = "SELECT * FROM asistencias WHERE id_huella = $usuario_id ORDER BY fecha DESC, hora DESC";
 $res_asistencias = $conexion->query($sql);
 
 $registros = [];

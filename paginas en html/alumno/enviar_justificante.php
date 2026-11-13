@@ -1,4 +1,5 @@
 <?php
+session_set_cookie_params(0, '/');
 session_start();
 header('Content-Type: application/json');
 include '../conexion.php';
@@ -54,7 +55,7 @@ if (!is_dir($carpeta_destino)) {
     mkdir($carpeta_destino, 0777, true);
 }
 
-$nombre_limpio  = preg_replace('/[^a-zA-Z0-9._-]/', '_', basename($archivo['name']));
+$nombre_limpio   = preg_replace('/[^a-zA-Z0-9._-]/', '_', basename($archivo['name']));
 $nombre_guardado = time() . '_' . $nombre_limpio;
 $ruta_final      = $carpeta_destino . $nombre_guardado;
 
@@ -77,4 +78,3 @@ if (move_uploaded_file($archivo['tmp_name'], $ruta_final)) {
     http_response_code(500);
     echo json_encode(['ok' => false, 'message' => 'No se pudo guardar el archivo en el servidor.']);
 }
-?>

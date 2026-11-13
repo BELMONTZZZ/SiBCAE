@@ -1,4 +1,5 @@
 <?php
+session_set_cookie_params(0, '/');
 session_start();
 include '../conexion.php';
 
@@ -10,16 +11,16 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'profesor') {
 
 // Actualizar estado de asistencia manualmente si el profesor lo cambia en la tabla
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cambiar_estado'])) {
-    $usuario_id   = intval($_POST['usuario_id']);
+    $id_huella    = intval($_POST['id_huella']);
     $nuevo_estado = $conexion->real_escape_string($_POST['nuevo_estado']);
     $hoy          = date('Y-m-d');
 
-    $existe = $conexion->query("SELECT id FROM asistencias WHERE usuario_id = $usuario_id AND fecha = '$hoy'");
+    $existe = $conexion->query("SELECT id FROM asistencias WHERE id_huella = $id_huella AND fecha = '$hoy'");
     if ($existe && $existe->num_rows > 0) {
-        $conexion->query("UPDATE asistencias SET estado = '$nuevo_estado' WHERE usuario_id = $usuario_id AND fecha = '$hoy'");
+        $conexion->query("UPDATE asistencias SET estado = '$nuevo_estado' WHERE id_huella = $id_huella AND fecha = '$hoy'");
     } else {
         $hora_actual = date('H:i:s');
-        $conexion->query("INSERT INTO asistencias (usuario_id, fecha, hora, estado) VALUES ($usuario_id, '$hoy', '$hora_actual', '$nuevo_estado')");
+        $conexion->query("INSERT INTO asistencias (id_huella, fecha, hora, estado) VALUES ($id_huella, '$hoy', '$hora_actual', '$nuevo_estado')");
     }
     header("Location: profesor.php?grupo=" . urlencode($_GET['grupo'] ?? 'todos'));
     exit;
@@ -32,9 +33,9 @@ $hoy = date('Y-m-d');
 $condicion_grupo = ($grupo_filtro !== 'todos') ? "AND u.grupo = '$grupo_filtro'" : "";
 
 // Consultar alumnos y su asistencia del día de hoy
-$sql = "SELECT u.id, u.id_huella, u.codigo, u.nombre, u.grupo, a.estado, a.hora
+$sql = "SELECT u.id_huella, u.codigo, u.nombre, u.grupo, a.estado, a.hora
         FROM usuarios u
-        LEFT JOIN asistencias a ON u.id = a.usuario_id AND a.fecha = '$hoy'
+        LEFT JOIN asistencias a ON u.id_huella = a.id_huella AND a.fecha = '$hoy'
         WHERE u.rol = 'alumno' $condicion_grupo
         ORDER BY u.grupo ASC, u.nombre ASC";
 $resultado = $conexion->query($sql);
@@ -187,7 +188,7 @@ if ($resultado) {
                                         <td>
                                             <form method="POST" action="profesor.php?grupo=<?php echo urlencode($grupo_filtro); ?>" style="display:inline;">
                                                 <input type="hidden" name="cambiar_estado" value="1">
-                                                <input type="hidden" name="usuario_id" value="<?php echo $al['id']; ?>">
+                                                <input type="hidden" name="id_huella" value="<?php echo $al['id_huella']; ?>">
                                                 <select name="nuevo_estado" onchange="this.form.submit()" class="status <?php echo $clase_badge; ?>" style="border:none; cursor:pointer; font-weight:600; padding:4px 8px; border-radius:6px;">
                                                     <option value="Asistencia" <?php if($est==='Asistencia'||$est==='Presente') echo 'selected'; ?>>Presente</option>
                                                     <option value="Retardo" <?php if($est==='Retardo') echo 'selected'; ?>>Retardo</option>

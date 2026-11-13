@@ -1,4 +1,5 @@
 <?php
+session_set_cookie_params(0, '/');
 session_start();
 include 'conexion.php';
 
@@ -33,11 +34,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Validar contraseña (soporta tanto hash seguro como texto plano de prueba)
         if (password_verify($password, $usuario['password']) || $password === $usuario['password']) {
-            $_SESSION['usuario_id'] = $usuario['id'];
+            $_SESSION['usuario_id'] = $usuario['id_huella'];
             $_SESSION['id_huella']  = $usuario['id_huella'];
             $_SESSION['nombre']     = $usuario['nombre'];
             $_SESSION['codigo']     = $usuario['codigo'];
             $_SESSION['rol']        = $usuario['rol'];
+
+            session_write_close();
 
             if ($usuario['rol'] === 'profesor') {
                 header("Location: profesor/profesor.php");
@@ -166,7 +169,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 tab.setAttribute('aria-selected', 'true');
 
                 currentRole = tab.dataset.role;
-                roleInput.value = currentRole; // Actualiza el input oculto para PHP
+                roleInput.value = currentRole;
                 const config = roleConfig[currentRole];
 
                 roleSubtitle.textContent = config.subtitle;

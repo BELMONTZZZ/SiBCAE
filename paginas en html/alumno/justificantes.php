@@ -1,4 +1,5 @@
 <?php
+session_set_cookie_params(0, '/');
 session_start();
 include '../conexion.php';
 
@@ -10,15 +11,15 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'alumno') {
 $usuario_id = intval($_SESSION['usuario_id']);
 
 // Datos del alumno
-$res_user = $conexion->query("SELECT * FROM usuarios WHERE id = $usuario_id LIMIT 1");
-$alumno   = $res_user->fetch_assoc();
+$res_user = $conexion->query("SELECT * FROM usuarios WHERE id_huella = $usuario_id LIMIT 1");
+$alumno   = $res_user ? $res_user->fetch_assoc() : [];
 $grupo    = $alumno['grupo'] ?? '1°A';
 $correo   = $alumno['correo'] ?? '';
 
 // Consultar faltas y retardos reales del alumno para el <select>
 $res_incidencias = $conexion->query(
     "SELECT * FROM asistencias 
-     WHERE usuario_id = $usuario_id AND (estado = 'Falta' OR estado = 'Retardo') 
+     WHERE id_huella = $usuario_id AND (estado = 'Falta' OR estado = 'Retardo') 
      ORDER BY fecha DESC"
 );
 
